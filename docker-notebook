@@ -28,8 +28,6 @@ image = args.image
 user = args.user
 notebook = args.notebook
 
-container = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(12))
-
 def random_ports(port, n):
     """Generate a list of n random ports near the given port.
 
@@ -64,11 +62,14 @@ if __name__ == "__main__":
 
    pwd = os.getcwd()
 
+   # Start the docker image and pipe the stderr
+   subprocess.call(["docker", "pull", "quay.io/" + user +"/" + image])
+
    # Find an unused port
    port = str(find_free_port(8888, 50))
 
    # Start the docker image and pipe the stderr
-   p = subprocess.Popen(["docker", "run", "--name", container,
+   p = subprocess.Popen(["docker", "run", "--rm",
                          "-w", "/home/" + user + "/shared", 
                          "-v", pwd + ":/home/" + user + "/shared", 
                          "-p", port + ":" + port, 
@@ -100,22 +101,11 @@ if __name__ == "__main__":
        # Terminate docker if user pressed Ctrl-C
        while True:
            try:
-               tosave = input('''Press Ctrl-C again to stop. To save your changes to the
-Docker image before exiting, type "commit":''')
-
-               if tosave.find("commit") >= 0:
-                   # Commit the image
-                   subprocess.call(["docker", "commit", container, "quay.io/" + user +"/" + image]);
-                   # Terminate the process and remove the docker container
-                   p.terminate()
-                   subprocess.call(["docker", "rm", "-f", container]);
-                   break
-               else:
-                   continue
+               tosave = input('''Press Ctrl-C again to stop.''')
+               continue
            except KeyboardInterrupt:
-               # Terminate the process and remove the docker container
+               # Terminate the process
                p.terminate()
-               subprocess.call(["docker", "rm", "-f", container]);
                break
    except OSError:
        pass
