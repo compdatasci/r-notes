@@ -64,14 +64,6 @@ if __name__ == "__main__":
 
    pwd = os.getcwd()
 
-   # Pull the docker image
-   try:
-       subprocess.check_call(["docker", "pull", "quay.io/" + user +"/" + image])
-   except CalledProcessError:
-       sys.exit(-1)      
-   except KeyboardInterrupt:
-       sys.exit(-1)
-   
    # Find an unused port
    port = str(find_free_port(8888, 50))
 
